@@ -1,7 +1,6 @@
 package task;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
@@ -15,16 +14,16 @@ import models.Task;
 import utils.DBUtil;
 
 /**
- * Servlet implementation class IndexServlet
+ * Servlet implementation class EditServlet
  */
-@WebServlet("/index")
-public class IndexServlet extends HttpServlet {
+@WebServlet("/edit")
+public class EditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public IndexServlet() {
+    public EditServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -36,25 +35,20 @@ public class IndexServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 	    EntityManager em = DBUtil.createEntityManager();
 
-	   
-	    
-	    List<Task> tasks = em.createNamedQuery("getAllMessages", Task.class).getResultList();
-	    
-	    
-	    em.close();
+        // 該当のIDのメッセージ1件のみをデータベースから取得
+        Task t = em.find(Task.class, Integer.parseInt(request.getParameter("id")));
 
-	    request.setAttribute("tasks", tasks);
+        em.close();
 
-	    RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/index.jsp");
-	    rd.forward(request, response);
-	}
+        // メッセージ情報とセッションIDをリクエストスコープに登録
+        request.setAttribute("task", t);
+        request.setAttribute("_token", request.getSession().getId());
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+        // メッセージIDをセッションスコープに登録
+        request.getSession().setAttribute("task_id", t.getId());
+
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/edit.jsp");
+        rd.forward(request, response);
 	}
 
 }
